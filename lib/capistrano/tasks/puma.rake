@@ -17,6 +17,7 @@ namespace :load do
     set :puma_error_log, -> { File.join(shared_path, 'log', 'puma_error.log') }
     set :puma_init_active_record, false
     set :puma_preload_app, false
+    set :puma_restart_on_deploy, true
 
     # Rbenv and RVM integration
     set :rbenv_map_bins, fetch(:rbenv_map_bins).to_a.concat(%w{ puma pumactl })
@@ -193,7 +194,7 @@ namespace :puma do
 
   task :add_default_hooks do
     after 'deploy:check', 'puma:check'
-    after 'deploy:finished', 'puma:smart_restart'
+    after 'deploy:finished', 'puma:smart_restart' if fetch(:puma_restart_on_deploy)
   end
 
 end
