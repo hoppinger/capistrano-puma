@@ -193,7 +193,5 @@ namespace :puma do
 
   task :add_default_hooks do
     after 'deploy:check', 'puma:check'
-    after 'deploy:finished', 'puma:smart_restart'
   end
-
 end
