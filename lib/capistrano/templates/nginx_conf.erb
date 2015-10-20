@@ -1,3 +1,5 @@
+<%= @local_ip = fetch(:nginx_local_ip, nil) %>
+
 upstream puma_<%= fetch(:nginx_config_name) %> { <%
   flags = 'fail_timeout=0'
   @backends = [fetch(:puma_bind)].flatten.map do |m|
@@ -13,19 +15,31 @@ end
 }
 <% if fetch(:nginx_use_ssl) %>
 server {
-  listen <%= "#{fetch(:nginx_local_ip, "127.0.0.1")}:80" %>;
+  <% if @local_ip %>
+    listen <%= "#{@local_ip}:80" %>;
+  <% else %>
+    listen 80;
+  <% end %>
   rewrite ^(.*) https://$host$1 permanent;
 }
 <% end %>
 
 server {
 <% if fetch(:nginx_use_ssl) %>
-  listen <%= "#{ fetch(:nginx_local_ip, "127.0.0.1")}:443" %>;
+  <% if @local_ip %>
+    listen <%= "#{@local_ip}:443" %>;
+  <% else %>
+    listen 443;
+  <% end %>
   ssl on;
   ssl_certificate /etc/ssl/certs/<%= fetch(:nginx_config_name) %>.crt;
   ssl_certificate_key /etc/ssl/private/<%= fetch(:nginx_config_name) %>.key;
 <% else %>
-  listen <%= "#{ fetch(:nginx_local_ip, "127.0.0.1")}:80" %>;
+  <% if @local_ip %>
+    listen <%= "#{@local_ip}:80" %>;
+  <% else %>
+    listen 80;
+  <% end %>
 <% end %>
 
   client_max_body_size 4G;
