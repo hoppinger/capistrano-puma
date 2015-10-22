@@ -1,4 +1,4 @@
-<%= @local_ip = fetch(:nginx_local_ip, nil) %>
+<% @local_ip = fetch(:nginx_local_ip, nil) %>
 
 upstream puma_<%= fetch(:nginx_config_name) %> { <%
   flags = 'fail_timeout=0'
