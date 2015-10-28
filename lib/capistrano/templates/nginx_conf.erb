@@ -64,12 +64,32 @@ server {
     access_log <%= shared_path %>/log/nginx.access.log;
     error_log <%= shared_path %>/log/nginx.error.log;
 
-<% if fetch(:nginx_use_basicauth) %>
+<% if fetch(:nginx_use_basicauth) && !fetch(:nginx_whitelist_ips) %>
     # Basic authentication
     auth_basic "Restricted";
     auth_basic_user_file <%= "#{fetch(:nginx_basicauth_location, "/var/www/_htpasswd/#{fetch(:nginx_config_name)}.htpasswd")}" %>;
 <% end %>
   }
+
+  <% if fetch(:nginx_whitelist_ips) %>
+    # start basic auth and whitelisting
+    # only for testing and acceptance
+    satisfy any;
+
+    <% fetch(:nginx_whitelist_ips).each do |ip| %>
+      <%= "allow #{ip};" %>
+    <% end %>
+
+    <% if fetch(:nginx_use_basicauth) %>
+      # Basic authentication
+      auth_basic "Restricted";
+      <%= "auth_basic_user_file #{fetch(:nginx_basicauth_location, "/var/www/_htpasswd/#{fetch(:nginx_config_name)}.htpasswd")};" %>
+    <% end %>
+
+    # by default deny everything
+    deny all;
+    # end basic auth and whitelisting
+  <% end %>
 
   location ^~ /assets/ {
     gzip_static on;
